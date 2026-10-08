@@ -1,0 +1,3 @@
+# Design documents are for the GitHub page only: keep them out of the plugin ZIP (git archive).
+/docs export-ignore
+/docs/** export-ignore

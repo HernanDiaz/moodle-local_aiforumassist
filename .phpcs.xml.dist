@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ruleset name="local_aiforumassist">
+    <description>Coding standard for local_aiforumassist: the Moodle standard, with the same
+    narrow exceptions as local_aigrader for lang files (long help texts, strings grouped by
+    feature rather than in strict alphabetical order).</description>
+
+    <rule ref="moodle"/>
+
+    <rule ref="moodle.Files.LineLength.TooLong">
+        <exclude-pattern>lang/*</exclude-pattern>
+    </rule>
+    <rule ref="moodle.Files.LineLength.MaxExceeded">
+        <exclude-pattern>lang/*</exclude-pattern>
+    </rule>
+    <rule ref="moodle.Files.LangFilesOrdering">
+        <exclude-pattern>lang/*</exclude-pattern>
+    </rule>
+</ruleset>
