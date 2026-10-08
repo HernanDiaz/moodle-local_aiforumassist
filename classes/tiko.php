@@ -72,7 +72,10 @@ class tiko {
                 'description' => $strings->get_string('tiko_description', 'local_aiforumassist', null, $lang),
                 'descriptionformat' => FORMAT_HTML,
             ];
-            $user->id = user_create_user($user, false, false);
+            // Moodle 5.3 replaced user_create_user() (MDL-82650).
+            $user->id = method_exists(\core\user::class, 'create_user')
+                ? \core\user::create_user($user, false, false)
+                : user_create_user($user, false, false);
             self::set_picture((int) $user->id);
         }
         set_config('tikouserid', $user->id, 'local_aiforumassist');
