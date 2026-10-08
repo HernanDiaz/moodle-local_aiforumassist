@@ -7,7 +7,7 @@ Thumbs.db
 
 # Build output and dependencies
 node_modules/
-vendor/
+/vendor/
 composer.lock
 package-lock.json
 
