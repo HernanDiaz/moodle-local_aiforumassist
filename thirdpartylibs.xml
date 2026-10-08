@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>thirdparty/vendor/smalot/pdfparser</location>
+        <name>smalot/pdfparser</name>
+        <description>Pure-PHP PDF text extractor. Used by \local_aiforumassist\extractor\pdf_extractor to read PDF course materials without requiring a system-level pdftotext binary.</description>
+        <version>2.12.5</version>
+        <license>LGPL</license>
+        <licenseversion>3.0+</licenseversion>
+        <repository>https://github.com/smalot/pdfparser</repository>
+        <copyrights>
+            <copyright>Sebastien MALOT</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>thirdparty/vendor/symfony/polyfill-mbstring</location>
+        <name>symfony/polyfill-mbstring</name>
+        <description>Polyfill that provides the mb_* string functions on PHP installs without the mbstring extension. Transitive dependency of smalot/pdfparser; effectively a no-op on Moodle hosts that already ship mbstring.</description>
+        <version>1.37.0</version>
+        <license>MIT</license>
+        <repository>https://github.com/symfony/polyfill-mbstring</repository>
+        <copyrights>
+            <copyright>Fabien Potencier</copyright>
+            <copyright>Symfony Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>thirdparty/vendor/composer</location>
+        <name>composer/autoload-bootstrap</name>
+        <description>Composer-generated autoloader bootstrap (ClassLoader, InstalledVersions, autoload_*.php) shipped under thirdparty/vendor/. Generated, not authored — declared here so the Moodle code/phpdoc checkers skip it.</description>
+        <version>2.x</version>
+        <license>MIT</license>
+        <repository>https://github.com/composer/composer</repository>
+        <copyrights>
+            <copyright>Nils Adermann</copyright>
+            <copyright>Jordi Boggiano</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>thirdparty/vendor/autoload.php</location>
+        <name>composer/autoload-entrypoint</name>
+        <description>Composer-generated autoloader entry point. Required so PHP can locate smalot/pdfparser at runtime via thirdparty/vendor/autoload.php. Single file at the vendor/ root, sibling to the composer/ subdirectory.</description>
+        <version>2.x</version>
+        <license>MIT</license>
+        <repository>https://github.com/composer/composer</repository>
+        <copyrights>
+            <copyright>Nils Adermann</copyright>
+            <copyright>Jordi Boggiano</copyright>
+        </copyrights>
+    </library>
+</libraries>
