@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/aiforumassist/db" VERSION="2026100800" COMMENT="DB schema for local_aiforumassist (AI Forum Assistant).">
+  <TABLES>
+
+    <TABLE NAME="local_aiforumassist_course" COMMENT="Per-course configuration set by the teacher.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK to {course}.id. One row per course."/>
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = the assistant drafts answers in this course's active forums."/>
+        <FIELD NAME="waitminutes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="120" SEQUENCE="false" COMMENT="Minutes to wait after a question before drafting, so the teacher or classmates can answer first."/>
+        <FIELD NAME="helplevel" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="guide" SEQUENCE="false" COMMENT="guide = only orient on graded tasks; explain = explain concepts in more detail. Graded tasks are never solved."/>
+        <FIELD NAME="ainote" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = add 'Prepared with the help of AI' to the replies the teacher publishes."/>
+        <FIELD NAME="reminders" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = weekly reminder of upcoming due dates."/>
+        <FIELD NAME="reminderforumid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {forum}.id where reminders are posted; 0 = the course's announcements forum."/>
+        <FIELD NAME="reminderday" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="ISO weekday of the reminder: 1 = Monday ... 7 = Sunday."/>
+        <FIELD NAME="reminderhour" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="8" SEQUENCE="false" COMMENT="Hour of the reminder, 0-23, in the site's time zone."/>
+        <FIELD NAME="reminderdays" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="7" SEQUENCE="false" COMMENT="How many days ahead the reminder looks."/>
+        <FIELD NAME="remindermode" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="draft" SEQUENCE="false" COMMENT="draft = the teacher approves it; auto = posted by Tiko."/>
+        <FIELD NAME="lastreminder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When the last weekly reminder was prepared."/>
+        <FIELD NAME="indexedtime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When the course materials were last indexed; 0 = never."/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {user}.id of the teacher who last changed the settings."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="courseid_unique" TYPE="unique" FIELDS="courseid"/>
+        <KEY NAME="courseid_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="usermodified_fk" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="local_aiforumassist_forum" COMMENT="Forums of a course where the assistant drafts answers. No row = off.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK to {course}.id."/>
+        <FIELD NAME="forumid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK to {forum}.id."/>
+        <FIELD NAME="mode" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="draft" SEQUENCE="false" COMMENT="draft = answers wait for the teacher. (auto arrives in v0.2.)"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="forumid_unique" TYPE="unique" FIELDS="forumid"/>
+        <KEY NAME="courseid_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="forumid_fk" TYPE="foreign" FIELDS="forumid" REFTABLE="forum" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="local_aiforumassist_draft" COMMENT="What the assistant prepared for the teacher: answer drafts, questions it could not answer, and reminder drafts.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK to {course}.id."/>
+        <FIELD NAME="kind" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" COMMENT="answer = drafted reply; question = needs the teacher (see reason); reminder = weekly reminder draft."/>
+        <FIELD NAME="status" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="pending" SEQUENCE="false" COMMENT="pending | published | discarded"/>
+        <FIELD NAME="forumid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK to {forum}.id."/>
+        <FIELD NAME="discussionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {forum_discussions}.id of the question; 0 for reminders."/>
+        <FIELD NAME="postid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {forum_posts}.id of the student's question; 0 for reminders."/>
+        <FIELD NAME="authorid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {user}.id of the student who asked; 0 for reminders."/>
+        <FIELD NAME="reason" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="For kind=question: not_in_materials | graded_task | ai_error | daily_limit."/>
+        <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Subject of the post to publish."/>
+        <FIELD NAME="message" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Drafted message (HTML), editable by the teacher."/>
+        <FIELD NAME="sources" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON list of the course modules the answer is based on: [{cmid, title}]."/>
+        <FIELD NAME="publishedpostid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {forum_posts}.id of the published post."/>
+        <FIELD NAME="decidedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {user}.id of the teacher who published or discarded it."/>
+        <FIELD NAME="timedecided" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="courseid_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="forumid_fk" TYPE="foreign" FIELDS="forumid" REFTABLE="forum" REFFIELDS="id"/>
+        <KEY NAME="authorid_fk" TYPE="foreign" FIELDS="authorid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="decidedby_fk" TYPE="foreign" FIELDS="decidedby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_status" UNIQUE="false" FIELDS="courseid, status"/>
+        <INDEX NAME="postid" UNIQUE="false" FIELDS="postid"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_aiforumassist_chunk" COMMENT="Index of a course's materials: text fragments used to answer questions. No personal data.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK to {course}.id."/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {course_modules}.id; 0 for the course summary and section summaries."/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Where the fragment comes from: activity name, chapter, file."/>
+        <FIELD NAME="chunkno" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Position of the fragment within its source."/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Plain text of the fragment (about 300 words)."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="courseid_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="local_aiforumassist_log" COMMENT="Audit log of every AI call and every teacher decision.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK to {course}.id."/>
+        <FIELD NAME="draftid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {local_aiforumassist_draft}.id, when there is one."/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="FK to {user}.id of the teacher who decided; 0 for calls made by the assistant in the background."/>
+        <FIELD NAME="action" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false" COMMENT="answer | reminder | publish | discard"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="AI provider that handled the call."/>
+        <FIELD NAME="model" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false" COMMENT="Model, when it can be known."/>
+        <FIELD NAME="prompthash" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="SHA-256 of the prompt."/>
+        <FIELD NAME="prompt" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Prompt sent to the AI (student names already replaced)."/>
+        <FIELD NAME="response" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Raw AI response."/>
+        <FIELD NAME="tokensin" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="tokensout" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="durationms" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="error" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Error message when the call failed."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="courseid_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="userid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_action_time" UNIQUE="false" FIELDS="courseid, action, timecreated"/>
+      </INDEXES>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>
