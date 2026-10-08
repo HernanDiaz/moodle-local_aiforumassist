@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_aiforumassist';
-$plugin->version   = 2026100800;
+$plugin->version   = 2026100801;
 $plugin->requires  = 2024100700; // Moodle 4.5: the AI subsystem.
 $plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = 'v0.0.1-dev';
+$plugin->release   = 'v0.1.0-alpha';
